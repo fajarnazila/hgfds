@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
@@ -65,17 +66,12 @@ export default function Stats() {
   const mounted = useMounted();
   const firestore = useFirestore();
 
-  const applicationsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'applications')) : null, [firestore]);
-  const usersQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'users')) : null, [firestore]);
   const programsQuery = useMemoFirebase(() => firestore ? query(collection(firestore, 'vocationalPrograms')) : null, [firestore]);
-  
-  const { data: applications } = useCollection(applicationsQuery);
-  const { data: users } = useCollection(usersQuery);
   const { data: programs } = useCollection(programsQuery);
 
   const schoolStats = [
-    { value: applications?.filter(app => app.status === 'accepted').length || 1200, label: 'Students', icon: GraduationCap },
-    { value: users?.filter(u => u.role === 'Admin').length || 50, label: 'Expert Teachers', icon: Users },
+    { value: 1200, label: 'Students', icon: GraduationCap },
+    { value: 50, label: 'Expert Teachers', icon: Users },
     { value: 95, label: 'Graduation Rate (%)', icon: Award },
     { value: programs?.length || 4, label: 'Vocational Programs', icon: BookOpen },
   ];
