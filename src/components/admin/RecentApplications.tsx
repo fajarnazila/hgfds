@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +23,7 @@ import { ArrowUpRight } from "lucide-react"
 import Link from "next/link"
 import { collection, query, orderBy, limit } from "firebase/firestore"
 import { format } from "date-fns"
+import { useMemo } from "react"
 
 const statusVariant = {
     pending: "default",
@@ -30,9 +32,23 @@ const statusVariant = {
     rejected: "destructive",
 } as const;
 
+type Application = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  programId: string;
+  status: keyof typeof statusVariant;
+  applicationDate: any;
+}
+
+type Program = {
+  id: string;
+  name: string;
+}
 
 export default function RecentApplications() {
   const firestore = useFirestore()
+
   const applicationsQuery = useMemoFirebase(() => {
     if (!firestore) return null
     return query(
@@ -42,7 +58,20 @@ export default function RecentApplications() {
     )
   }, [firestore])
 
-  const { data: applications, isLoading } = useCollection(applicationsQuery)
+  const programsQuery = useMemoFirebase(() => {
+    if (!firestore) return null
+    return query(collection(firestore, "vocationalPrograms"))
+  }, [firestore])
+
+  const { data: applications, isLoading: isLoadingApps } = useCollection<Application>(applicationsQuery)
+  const { data: programs, isLoading: isLoadingPrograms } = useCollection<Program>(programsQuery)
+
+  const programMap = useMemo(() => {
+    if (!programs) return new Map();
+    return new Map(programs.map(p => [p.id, p.name]));
+  }, [programs]);
+  
+  const isLoading = isLoadingApps || isLoadingPrograms;
 
   return (
     <Card>
@@ -81,9 +110,9 @@ export default function RecentApplications() {
                     <TableCell>
                         <div className="font-medium">{app.firstName} {app.lastName}</div>
                     </TableCell>
-                    <TableCell>{app.programId}</TableCell>
+                    <TableCell>{programMap.get(app.programId) || app.programId}</TableCell>
                     <TableCell className="text-center">
-                        <Badge variant={statusVariant[app.status as keyof typeof statusVariant] ?? 'default'} className="capitalize">{app.status.toLowerCase()}</Badge>
+                        <Badge variant={statusVariant[app.status] ?? 'default'} className="capitalize">{app.status.toLowerCase()}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                        {app.applicationDate ? format(new Date(app.applicationDate.seconds * 1000), "yyyy-MM-dd") : 'N/A'}

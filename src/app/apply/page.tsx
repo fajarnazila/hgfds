@@ -1,7 +1,7 @@
-// This is a new file
+
 "use client"
 
-import { useState, useTransition } from "react"
+import { useTransition } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -18,9 +18,14 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
-import { addDocumentNonBlocking, useFirestore } from "@/firebase"
-import { collection, serverTimestamp } from "firebase/firestore"
-import { featuredPrograms } from "@/lib/placeholder-data"
+import { addDocumentNonBlocking, useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, serverTimestamp, query } from "firebase/firestore"
+import { Skeleton } from "@/components/ui/skeleton"
+
+type Program = {
+  id: string;
+  name: string;
+}
 
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "Nama depan harus memiliki setidaknya 2 karakter." }),
@@ -34,6 +39,13 @@ export default function ApplyPage() {
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
   const firestore = useFirestore()
+
+  const programsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, "vocationalPrograms"));
+  }, [firestore]);
+
+  const { data: programs, isLoading: isLoadingPrograms } = useCollection<Program>(programsQuery);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -153,20 +165,24 @@ export default function ApplyPage() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Program Keahlian</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih program keahlian" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {featuredPrograms.map(program => (
-                        <SelectItem key={program.title} value={program.title}>
-                          {program.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {isLoadingPrograms ? (
+                    <Skeleton className="h-10 w-full" />
+                  ) : (
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih program keahlian" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {programs?.map(program => (
+                          <SelectItem key={program.id} value={program.id}>
+                            {program.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

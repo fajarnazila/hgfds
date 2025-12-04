@@ -1,4 +1,4 @@
-// This is a new file
+
 "use client"
 
 import {
@@ -17,8 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
-import { collection, query, orderBy, doc, updateDoc } from "firebase/firestore"
+import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
+import { collection, query, orderBy, doc } from "firebase/firestore"
 import { format } from "date-fns"
 import {
   DropdownMenu,
@@ -38,8 +38,23 @@ const statusVariant = {
 
 type ApplicationStatus = keyof typeof statusVariant;
 
+type Application = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  programId: string;
+  status: ApplicationStatus;
+  applicationDate: any;
+}
+
+type Program = {
+  id: string;
+  name: string;
+}
+
 export default function AdminAdmissionsPage() {
   const firestore = useFirestore()
+
   const applicationsQuery = useMemoFirebase(() => {
     if (!firestore) return null
     return query(
@@ -48,17 +63,27 @@ export default function AdminAdmissionsPage() {
     )
   }, [firestore])
 
-  const { data: applications, isLoading } = useCollection(applicationsQuery)
+  const programsQuery = useMemoFirebase(() => {
+    if (!firestore) return null
+    return query(collection(firestore, "vocationalPrograms"))
+  }, [firestore])
+
+  const { data: applications, isLoading: isLoadingApps } = useCollection<Application>(applicationsQuery)
+  const { data: programs, isLoading: isLoadingPrograms } = useCollection<Program>(programsQuery)
+  
+  const programMap = useMemoFirebase(() => {
+    if (!programs) return new Map();
+    return new Map(programs.map(p => [p.id, p.name]));
+  }, [programs]);
+
 
   const handleStatusChange = async (id: string, status: ApplicationStatus) => {
     if (!firestore) return;
     const appRef = doc(firestore, "applications", id);
-    try {
-      await updateDoc(appRef, { status: status });
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
+    updateDocumentNonBlocking(appRef, { status: status });
   }
+  
+  const isLoading = isLoadingApps || isLoadingPrograms;
 
   return (
     <Card>
@@ -90,9 +115,9 @@ export default function AdminAdmissionsPage() {
             {applications && applications.length > 0 ? applications.map((app) => (
               <TableRow key={app.id}>
                 <TableCell className="font-medium">{app.firstName} {app.lastName}</TableCell>
-                <TableCell>{app.programId}</TableCell>
+                <TableCell>{programMap.get(app.programId) || app.programId}</TableCell>
                 <TableCell>
-                  <Badge variant={statusVariant[app.status as ApplicationStatus] ?? 'default'} className="capitalize">{app.status}</Badge>
+                  <Badge variant={statusVariant[app.status] ?? 'default'} className="capitalize">{app.status}</Badge>
                 </TableCell>
                 <TableCell>{app.applicationDate ? format(new Date(app.applicationDate.seconds * 1000), "yyyy-MM-dd") : 'N/A'}</TableCell>
                 <TableCell>

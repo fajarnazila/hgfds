@@ -1,3 +1,4 @@
+
 "use client"
 
 import {
@@ -7,19 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { adminOverviewData } from "@/lib/placeholder-data"
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection, query } from "firebase/firestore"
-import { GraduationCap, Users } from "lucide-react"
+import { GraduationCap, Users, Newspaper, Mail } from "lucide-react"
 
 export default function Overview() {
   const firestore = useFirestore()
 
-  const studentsQuery = useMemoFirebase(() => {
+  const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null
-    return query(collection(firestore, "students"))
+    return query(collection(firestore, "users"))
   }, [firestore])
-  const { data: students } = useCollection(studentsQuery)
+  const { data: users } = useCollection(usersQuery)
 
   const applicationsQuery = useMemoFirebase(() => {
     if (!firestore) return null
@@ -27,10 +27,23 @@ export default function Overview() {
   }, [firestore])
   const { data: applications } = useCollection(applicationsQuery)
 
+  const newsQuery = useMemoFirebase(() => {
+    if (!firestore) return null
+    return query(collection(firestore, "newsArticles"))
+  }, [firestore])
+  const { data: news } = useCollection(newsQuery)
+  
+  const messagesQuery = useMemoFirebase(() => {
+    if (!firestore) return null
+    return query(collection(firestore, "contactMessages"))
+  }, [firestore])
+  const { data: messages } = useCollection(messagesQuery)
+
   const overviewData = [
-    { title: "Total Students", value: students?.length ?? 0, change: "", icon: Users, collection: "students" },
-    { title: "New Applications", value: applications?.length ?? 0, change: "", icon: GraduationCap, collection: "applications" },
-    ...adminOverviewData.slice(2),
+    { title: "New Applications", value: applications?.length ?? 0, icon: GraduationCap },
+    { title: "Total Users", value: users?.length ?? 0, icon: Users },
+    { title: "News Articles", value: news?.length ?? 0, icon: Newspaper },
+    { title: "Total Messages", value: messages?.length ?? 0, icon: Mail },
   ]
 
   return (
@@ -45,9 +58,7 @@ export default function Overview() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold font-headline">{item.value}</div>
-              {item.change && <p className="text-xs text-muted-foreground">
-                {item.change}
-              </p>}
+              <p className="text-xs text-muted-foreground">&nbsp;</p>
             </CardContent>
           </Card>
       ))}
