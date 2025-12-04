@@ -15,25 +15,17 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    function getUserData(userId) {
-      return get(/databases/$(database)/documents/users/$(userId)).data;
-    }
-
-    function isRole(role) {
-      return isSignedIn() && getUserData(request.auth.uid).role == role;
-    }
-    
+    // isAdmin is now based on a custom token claim, not a Firestore document read.
+    // To make a user an admin, you must set a custom claim on their user account.
+    // e.g. `auth.setCustomUserClaims(uid, { admin: true })`
     function isAdmin() {
-      return isSignedIn() && (isRole('Admin') || isRole('Super Admin'));
+      return isSignedIn() && (request.auth.token.admin == true || isSuperAdmin());
     }
 
+    // Super Admin is also based on a custom token claim.
+    // e.g. `auth.setCustomUserClaims(uid, { super_admin: true })`
     function isSuperAdmin() {
-        return isSignedIn() && isRole('Super Admin');
-    }
-
-    // This function checks if the 'users' collection is empty.
-    function isFirstUser() {
-      return !exists(/databases/$(database)/documents/users);
+      return isSignedIn() && request.auth.token.super_admin == true;
     }
     
     //----------------------------------------------------------------------
@@ -86,22 +78,20 @@ service cloud.firestore {
       // Users can get their own data, Admins can get any user's data
       allow get: if isOwner(userId) || isAdmin();
       
-      // Only Admins and Super Admins can list all users
+      // Admins can list all users
       allow list: if isAdmin();
       
       // Allow user creation.
-      // The role is set based on whether this is the first user or not.
-      allow create: if request.auth != null && (
-        (isFirstUser() && request.resource.data.role == 'Super Admin') ||
-        (!isFirstUser() && request.resource.data.role == 'User')
-      );
+      // Roles are no longer set on creation; they are managed via custom claims.
+      allow create: if isSignedIn() && !('role' in request.resource.data);
                       
       // A user can update their own displayName and photoURL, but not their role.
       allow update: if isOwner(userId) && 
                       !('role' in request.resource.data.keys());
       
-      // Only a Super Admin can change other users' roles or delete users.
-      allow update, delete: if isSuperAdmin(); 
+      // Only a Super Admin can delete users. They can update roles via custom claims.
+      allow delete: if isSuperAdmin(); 
+      allow update: if isSuperAdmin(); // SuperAdmins can manage user roles
     }
   }
 }

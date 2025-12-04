@@ -52,19 +52,18 @@ export default function AdminSignupPage() {
         await updateProfile(user, { displayName })
 
         // 3. Create user document in Firestore.
-        // The role will be set by the security rules implemented in `firestore.rules`.
+        // The role is now managed by custom claims, not set on the client.
         const userDocRef = doc(firestore, "users", user.uid)
         await setDoc(userDocRef, {
             displayName: displayName,
             email: user.email,
             photoURL: user.photoURL,
-            // The role is NOT set on the client. It will be determined by security rules.
-            // The first registered user will be 'Super Admin', subsequent users will be 'User'.
+            role: 'User' // Default role, to be changed by an Admin/Super Admin via custom claims
         })
 
         toast({
           title: "Signup Successful",
-          description: `Welcome, ${displayName}! Redirecting you to the admin dashboard.`,
+          description: `Welcome, ${displayName}! Redirecting you to the admin dashboard. Note: Your role is 'User'. An admin must grant you privileges.`,
         })
 
         // A small delay to allow Firestore rules to process and the user object to be updated.
@@ -97,7 +96,7 @@ export default function AdminSignupPage() {
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold font-headline">Create Admin Account</h1>
             <p className="text-balance text-muted-foreground">
-              Enter your details to create a new account. The first user will be the Super Admin.
+              Enter your details to create a new account. An existing admin must grant you privileges.
             </p>
           </div>
           <form onSubmit={handleSignup}>
