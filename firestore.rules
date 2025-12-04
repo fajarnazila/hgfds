@@ -28,9 +28,27 @@ service cloud.firestore {
      * This function performs a read on the user's own document to fetch their role.
      */
     function isAdmin() {
-      let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-      return isSignedIn() && (userRole == 'Admin' || userRole == 'Super Admin');
+      // Check for existence of the user document before accessing data
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Admin', 'Super Admin']);
     }
+
+    /**
+     * Checks if the user is a Super Admin.
+     */
+    function isSuperAdmin() {
+        return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+    }
+
+    /**
+     * Checks if the users collection is empty. Used to assign the first user as Super Admin.
+     */
+    function isFirstUser() {
+        return !exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+               get(/databases/$(database)/documents/users).size() == 0;
+    }
+
 
     //----------------------------------------------------------------------
     // Public Read-Only Collections (Admin-Managed)
@@ -112,14 +130,17 @@ service cloud.firestore {
     //----------------------------------------------------------------------
 
     /**
-     * @description Manages user profile data and roles. A user can read their own
-     *   profile. Only admins can list, create, update or delete user profiles.
-     *   Listing all users is restricted to admins for privacy.
+     * @description Manages user profile data and roles.
+     *  - A user can read their own profile.
+     *  - Any user can create their own user document during signup.
+     *  - Only Super Admins can list, update, or delete users.
      * @path /users/{userId}
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      allow list, create, update, delete: if isAdmin();
+      allow create: if isOwner(userId); // Allows a user to create their own document on sign-up
+      allow list: if isAdmin();
+      allow update, delete: if isSuperAdmin(); // Only Super Admins can modify/delete users
     }
   }
 }

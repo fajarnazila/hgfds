@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useTransition } from "react"
@@ -93,6 +94,12 @@ export default function AdminLoginPage() {
               <Button type="submit" className="w-full" disabled={isPending}>
                 {isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Logging in...</> : 'Login'}
               </Button>
+               <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <Link href="/signup" className="underline">
+                  Sign up
+                </Link>
+              </div>
             </div>
           </form>
         </div>

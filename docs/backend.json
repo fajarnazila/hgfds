@@ -236,6 +236,10 @@
             "Admin",
             "User"
           ]
+        },
+        "photoURL": {
+            "type": "string",
+            "format": "uri"
         }
       },
       "required": [
