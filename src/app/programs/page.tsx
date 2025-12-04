@@ -1,0 +1,113 @@
+// This is a new file
+"use client"
+
+import Image from "next/image"
+import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
+import { collection, query } from "firebase/firestore"
+import { Skeleton } from "@/components/ui/skeleton"
+
+type Program = {
+  id: string;
+  name: string;
+  description: string;
+  careerProspects: string;
+  imageUrl: string;
+};
+
+export default function ProgramsPage() {
+    const heroImage = PlaceHolderImages.find(img => img.id === 'program-multimedia');
+    
+    const firestore = useFirestore();
+    const programsQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, "vocationalPrograms"));
+    }, [firestore]);
+
+    const { data: programs, isLoading } = useCollection<Program>(programsQuery);
+
+    return (
+        <div className="bg-background text-foreground">
+            {/* Hero Section */}
+            <section className="relative h-64 md:h-80 w-full flex items-center justify-center text-center text-white">
+                {heroImage && (
+                    <Image
+                        src={heroImage.imageUrl}
+                        alt={heroImage.description}
+                        fill
+                        className="object-cover"
+                        priority
+                        data-ai-hint={heroImage.imageHint}
+                    />
+                )}
+                <div className="absolute inset-0 bg-primary/60" />
+                <div className="relative z-10 p-4">
+                    <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl font-headline">
+                        Program Kejuruan
+                    </h1>
+                    <p className="mt-2 max-w-2xl mx-auto text-lg text-primary-foreground/90">
+                        Temukan keahlian yang tepat untuk masa depan Anda di SMK LPPMRI 2 Kedungreja.
+                    </p>
+                </div>
+            </section>
+
+            {/* Main Content */}
+            <main className="container mx-auto px-4 md:px-6 py-12 md:py-20">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl font-bold tracking-tight sm:text-4xl font-headline">
+                        Program Unggulan Kami
+                    </h2>
+                    <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
+                        Kami menawarkan berbagai program kejuruan yang dirancang untuk membekali siswa dengan keterampilan praktis dan pengetahuan mendalam yang relevan dengan kebutuhan industri saat ini.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                     {isLoading && Array.from({ length: 4 }).map((_, i) => (
+                        <Card key={i} className="overflow-hidden">
+                           <Skeleton className="h-56 w-full" />
+                           <CardHeader>
+                               <Skeleton className="h-6 w-3/4" />
+                               <Skeleton className="h-4 w-full mt-2" />
+                               <Skeleton className="h-4 w-5/6 mt-1" />
+                           </CardHeader>
+                           <CardContent>
+                               <Skeleton className="h-5 w-1/4 mb-2" />
+                               <Skeleton className="h-4 w-full" />
+                               <Skeleton className="h-4 w-full mt-1" />
+                           </CardContent>
+                        </Card>
+                     ))}
+                     {programs?.map(program => (
+                        <Card key={program.id} className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
+                           <div className="relative h-56 w-full">
+                               <Image 
+                                   src={program.imageUrl || "https://picsum.photos/600/400"} 
+                                   alt={`Gambar untuk ${program.name}`}
+                                   fill
+                                   className="object-cover"
+                                   sizes="(max-width: 768px) 100vw, 50vw"
+                               />
+                           </div>
+                           <CardHeader>
+                               <CardTitle className="text-2xl font-headline text-primary">{program.name}</CardTitle>
+                               <CardDescription>{program.description}</CardDescription>
+                           </CardHeader>
+                           <CardContent className="flex-grow">
+                               <h4 className="font-semibold mb-2 text-foreground">Prospek Karir</h4>
+                               <p className="text-sm text-muted-foreground">{program.careerProspects}</p>
+                           </CardContent>
+                       </Card>
+                     ))}
+                </div>
+
+                 {!isLoading && programs?.length === 0 && (
+                    <div className="text-center py-16 text-muted-foreground">
+                        <p>Belum ada program kejuruan yang tersedia saat ini.</p>
+                    </div>
+                )}
+            </main>
+        </div>
+    )
+}
