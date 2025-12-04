@@ -1,3 +1,4 @@
+
 /**
  * Core Philosophy: This ruleset secures a school management and information website.
  * It provides public read-only access to general school information like programs,
@@ -183,6 +184,17 @@ service cloud.firestore {
     match /applications/{applicationId} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
+    }
+
+    /**
+     * @description Manages contact form submissions. Anyone can submit a message.
+     *  Only admins can read the messages. Deletion is restricted for archival purposes.
+     * @path /contactMessages/{contactMessageId}
+     */
+    match /contactMessages/{contactMessageId} {
+      allow create: if true;
+      allow read, list: if isAdmin();
+      allow update, delete: if false; // Messages are immutable
     }
 
     //----------------------------------------------------------------------

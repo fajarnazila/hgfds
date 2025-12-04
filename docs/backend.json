@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "VocationalProgram": {
@@ -451,6 +452,48 @@
         "date",
         "isPresent"
       ]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Represents a message submitted through the contact form.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the contact message."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person who sent the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the sender.",
+          "format": "email"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the message."
+        },
+        "message": {
+          "type": "string",
+          "description": "Content of the message."
+        },
+        "submittedAt": {
+          "type": "string",
+          "description": "Date and time the message was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "subject",
+        "message",
+        "submittedAt"
+      ]
     }
   },
   "auth": {
@@ -579,8 +622,18 @@
           },
           "description": "Stores attendance records for students. Path-based ownership under student ID."
         }
+      },
+      {
+        "path": "/contactMessages/{contactMessageId}",
+        "definition": {
+          "entityName": "ContactMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ContactMessage"
+          },
+          "description": "Stores messages submitted through the website's contact form. This allows admins to view user inquiries."
+        }
       }
     ],
-    "reasoning": "The Firestore data structure has been updated to place the 'applications' collection at the root level. This change significantly simplifies querying for administrators, who now need to list all applications regardless of the user who submitted them. The previous nested structure (`/users/{userId}/applications/{applicationId}`) was ideal for user-specific queries but cumbersome for admin-level data aggregation. By moving it to `/applications/{applicationId}`, we enable straightforward `list` operations for the admin panel while still being able to secure it so that only admins can read all applications and users can only read their own (if needed, through rules). All other collections remain as they were, following principles of structural segregation and role-based access control via the 'role' field in the '/users/{userId}' documents."
+    "reasoning": "The Firestore data structure has been updated to place the 'applications' collection at the root level. This change significantly simplifies querying for administrators, who now need to list all applications regardless of the user who submitted them. The previous nested structure (`/users/{userId}/applications/{applicationId}`) was ideal for user-specific queries but cumbersome for admin-level data aggregation. By moving it to `/applications/{applicationId}`, we enable straightforward `list` operations for the admin panel while still being able to secure it so that only admins can read all applications and users can only read their own (if needed, through rules). All other collections remain as they were, following principles of structural segregation and role-based access control via the 'role' field in the '/users/{userId}' documents. A new root collection 'contactMessages' has been added to store submissions from the contact form for admin review."
   }
 }
