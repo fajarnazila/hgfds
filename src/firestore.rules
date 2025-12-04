@@ -78,5 +78,13 @@ service cloud.firestore {
       // Only admins can delete users.
       allow delete: if isAdmin(); 
     }
+
+    //----------------------------------------------------------------------
+    // Site-Wide Settings (Admin only)
+    //----------------------------------------------------------------------
+    match /siteSettings/main {
+      allow get, list: if true;
+      allow write: if isAdmin();
+    }
   }
 }

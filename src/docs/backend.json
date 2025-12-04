@@ -1,0 +1,358 @@
+
+{
+  "entities": {
+    "VocationalProgram": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "VocationalProgram",
+      "type": "object",
+      "description": "Represents a vocational program offered by the school.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the vocational program."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the program, including curriculum overview and skills learned."
+        },
+        "careerProspects": {
+          "type": "string",
+          "description": "Potential career paths for graduates of this program."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of an image representing the program.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "careerProspects",
+        "imageUrl"
+      ]
+    },
+    "NewsArticle": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "NewsArticle",
+      "type": "object",
+      "description": "Represents a news article or announcement.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Title of the news article."
+        },
+        "content": {
+          "type": "string",
+          "description": "Main content of the news article."
+        },
+        "author": {
+          "type": "string",
+          "description": "Author of the news article."
+        },
+        "publicationDate": {
+          "type": "string",
+          "description": "Date and time the news article was published.",
+          "format": "date-time"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of an image associated with the news article.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "title",
+        "content",
+        "author",
+        "publicationDate"
+      ]
+    },
+    "GalleryAlbum": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GalleryAlbum",
+      "type": "object",
+      "description": "Represents a gallery album containing images.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the gallery album."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the gallery album."
+        },
+        "imageUrls": {
+          "type": "array",
+          "description": "URLs of images in the album.",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "imageUrls"
+      ]
+    },
+    "Application": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Application",
+      "type": "object",
+      "description": "Represents a student application.",
+      "properties": {
+        "firstName": {
+          "type": "string",
+          "description": "First name of the applicant."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the applicant."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the applicant.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the applicant."
+        },
+        "programId": {
+          "type": "string",
+          "description": "ID of the selected vocational program."
+        },
+        "applicationDate": {
+          "type": "string",
+          "description": "Date the application was submitted.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the application (e.g., pending, reviewed, accepted, rejected)."
+        }
+      },
+      "required": [
+        "firstName",
+        "lastName",
+        "email",
+        "phoneNumber",
+        "programId",
+        "applicationDate",
+        "status"
+      ]
+    },
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile information.",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "Super Admin",
+            "Admin",
+            "User"
+          ]
+        },
+        "photoURL": {
+            "type": "string",
+            "format": "uri"
+        }
+      },
+      "required": [
+        "email"
+      ]
+    },
+    "ContactMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ContactMessage",
+      "type": "object",
+      "description": "Represents a message submitted through the contact form.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the person who sent the message."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the sender.",
+          "format": "email"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the message."
+        },
+        "message": {
+          "type": "string",
+          "description": "Content of the message."
+        },
+        "submittedAt": {
+          "type": "string",
+          "description": "Date and time the message was submitted.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "email",
+        "subject",
+        "message",
+        "submittedAt"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a testimonial from a student, parent, or alumnus.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the person giving the testimonial."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title or role of the person (e.g., 'Alumnus', 'Parent')."
+        },
+        "quote": {
+          "type": "string",
+          "description": "The testimonial quote."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the person's portrait image.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "quote",
+        "imageUrl"
+      ]
+    },
+    "SiteSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SiteSettings",
+      "type": "object",
+      "description": "Stores general site settings and information.",
+      "properties": {
+        "schoolName": {
+          "type": "string",
+          "description": "The official name of the school."
+        },
+        "address": {
+          "type": "string",
+          "description": "The physical address of the school."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The primary contact phone number."
+        },
+        "email": {
+          "type": "string",
+          "description": "The primary contact email address.",
+          "format": "email"
+        }
+      },
+      "required": [
+        "schoolName",
+        "address",
+        "phone",
+        "email"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/vocationalPrograms/{vocationalProgramId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/VocationalProgram"
+          },
+          "description": "Stores information about vocational programs offered by the school."
+        }
+      },
+      {
+        "path": "/newsArticles/{newsArticleId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/NewsArticle"
+          },
+          "description": "Stores news articles and announcements."
+        }
+      },
+      {
+        "path": "/galleryAlbums/{galleryAlbumId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/GalleryAlbum"
+          },
+          "description": "Stores gallery albums containing images."
+        }
+      },
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/UserProfile"
+          },
+          "description": "Stores user profile information for all users, including admins. The 'role' field is used for authorization."
+        }
+      },
+      {
+        "path": "/applications/{applicationId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/Application"
+          },
+          "description": "Stores student applications in a single collection for easier admin querying."
+        }
+      },
+      {
+        "path": "/contactMessages/{contactMessageId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/ContactMessage"
+          },
+          "description": "Stores messages submitted through the website's contact form. This allows admins to view user inquiries."
+        }
+      },
+      {
+        "path": "/testimonials/{testimonialId}",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/Testimonial"
+          },
+          "description": "Stores testimonials from students, parents, and alumni for the homepage."
+        }
+      },
+       {
+        "path": "/siteSettings/main",
+        "definition": {
+          "schema": {
+            "$ref": "#/entities/SiteSettings"
+          },
+          "description": "A singleton document to store general site settings like school name, address, and contact info."
+        }
+      }
+    ]
+  }
+}

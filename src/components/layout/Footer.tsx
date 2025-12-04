@@ -1,8 +1,14 @@
 
+"use client"
+
 import Link from 'next/link';
 import { BookHeart, Twitter, Facebook, Instagram, Youtube } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import type { SiteSettings } from '@/app/admin/settings/page';
+import { Skeleton } from '../ui/skeleton';
 
 const navLinks = [
   { href: '/', label: 'Beranda' },
@@ -15,6 +21,11 @@ const navLinks = [
 ];
 
 export default function Footer() {
+  const firestore = useFirestore();
+  const settingsDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'siteSettings', 'main') : null, [firestore]);
+  const { data: settings, isLoading } = useDoc<SiteSettings>(settingsDocRef);
+  const schoolName = settings?.schoolName || "SMK LPPMRI 2";
+
   return (
     <footer className="bg-secondary text-secondary-foreground border-t">
       <div className="container mx-auto grid grid-cols-1 gap-12 px-4 py-16 md:grid-cols-4 md:px-6">
@@ -22,7 +33,7 @@ export default function Footer() {
           <Link href="/" className="flex items-center gap-2" prefetch={false}>
             <BookHeart className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold font-headline">
-              SMK LPPMRI 2
+              {schoolName}
             </span>
           </Link>
           <p className="text-sm">
@@ -50,21 +61,45 @@ export default function Footer() {
           </div>
           <div>
             <h3 className="font-headline font-semibold">Hubungi Kami</h3>
-            <ul className="mt-4 space-y-2 text-sm">
-              <li>Jl. Raya Kedungreja No.1</li>
-              <li>Kedungreja, Cilacap</li>
-              <li>Jawa Tengah, Indonesia</li>
-              <li className="pt-2">
-                <a href="tel:+621234567890" className="hover:text-primary transition-colors">
-                  (123) 456-7890
-                </a>
-              </li>
-              <li>
-                <a href="mailto:info@smklppmri2.sch.id" className="hover:text-primary transition-colors">
-                  info@smklppmri2.sch.id
-                </a>
-              </li>
-            </ul>
+            {isLoading ? (
+               <ul className="mt-4 space-y-2 text-sm">
+                  <li><Skeleton className="h-4 w-3/4" /></li>
+                  <li><Skeleton className="h-4 w-1/2" /></li>
+                  <li><Skeleton className="h-4 w-3/5" /></li>
+                  <li className="pt-2"><Skeleton className="h-4 w-1/2" /></li>
+                  <li><Skeleton className="h-4 w-full" /></li>
+               </ul>
+            ) : settings ? (
+              <ul className="mt-4 space-y-2 text-sm">
+                <li>{settings.address}</li>
+                <li className="pt-2">
+                  <a href={`tel:${settings.phone}`} className="hover:text-primary transition-colors">
+                    {settings.phone}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${settings.email}`} className="hover:text-primary transition-colors">
+                    {settings.email}
+                  </a>
+                </li>
+              </ul>
+            ) : (
+               <ul className="mt-4 space-y-2 text-sm">
+                  <li>Jl. Raya Kedungreja No.1</li>
+                  <li>Kedungreja, Cilacap</li>
+                  <li>Jawa Tengah, Indonesia</li>
+                  <li className="pt-2">
+                    <a href="tel:+621234567890" className="hover:text-primary transition-colors">
+                      (123) 456-7890
+                    </a>
+                  </li>
+                  <li>
+                    <a href="mailto:info@smklppmri2.sch.id" className="hover:text-primary transition-colors">
+                      info@smklppmri2.sch.id
+                    </a>
+                  </li>
+              </ul>
+            )}
           </div>
           <div className="col-span-2 md:col-span-1">
             <h3 className="font-headline font-semibold">Buletin</h3>
@@ -78,7 +113,7 @@ export default function Footer() {
       </div>
       <div className="border-t">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 py-6 text-sm md:flex-row md:px-6">
-          <p>&copy; {new Date().getFullYear()} SMK LPPMRI 2 Kedungreja. Hak cipta dilindungi undang-undang.</p>
+          <p>&copy; {new Date().getFullYear()} {schoolName}. Hak cipta dilindungi undang-undang.</p>
           <div className="flex gap-4">
             <Link href="#" className="hover:text-primary transition-colors">Kebijakan Privasi</Link>
             <Link href="#" className="hover:text-primary transition-colors">Ketentuan Layanan</Link>
