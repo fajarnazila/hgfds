@@ -7,10 +7,6 @@
       "type": "object",
       "description": "Represents a vocational program offered by the school.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the vocational program."
-        },
         "name": {
           "type": "string",
           "description": "Name of the vocational program."
@@ -30,7 +26,6 @@
         }
       },
       "required": [
-        "id",
         "name",
         "description",
         "careerProspects",
@@ -43,10 +38,6 @@
       "type": "object",
       "description": "Represents a news article or announcement.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the news article."
-        },
         "title": {
           "type": "string",
           "description": "Title of the news article."
@@ -71,70 +62,18 @@
         }
       },
       "required": [
-        "id",
         "title",
         "content",
         "author",
         "publicationDate"
       ]
     },
-    "Event": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Event",
-      "type": "object",
-      "description": "Represents a school event.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the event."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the event."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the event."
-        },
-        "startDate": {
-          "type": "string",
-          "description": "Date and time the event starts.",
-          "format": "date-time"
-        },
-        "endDate": {
-          "type": "string",
-          "description": "Date and time the event ends.",
-          "format": "date-time"
-        },
-        "location": {
-          "type": "string",
-          "description": "Location of the event."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of an image associated with the event.",
-          "format": "uri"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "startDate",
-        "endDate",
-        "location"
-      ]
-    },
     "GalleryAlbum": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "GalleryAlbum",
       "type": "object",
-      "description": "Represents a gallery album containing images and videos.",
+      "description": "Represents a gallery album containing images.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the gallery album."
-        },
         "name": {
           "type": "string",
           "description": "Name of the gallery album."
@@ -147,21 +86,15 @@
           "type": "array",
           "description": "URLs of images in the album.",
           "items": {
-            "type": "string"
-          }
-        },
-        "videoUrls": {
-          "type": "array",
-          "description": "URLs of videos in the album.",
-          "items": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           }
         }
       },
       "required": [
-        "id",
         "name",
-        "description"
+        "description",
+        "imageUrls"
       ]
     },
     "Application": {
@@ -170,10 +103,6 @@
       "type": "object",
       "description": "Represents a student application.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the application."
-        },
         "firstName": {
           "type": "string",
           "description": "First name of the applicant."
@@ -193,7 +122,7 @@
         },
         "programId": {
           "type": "string",
-          "description": "Reference to VocationalProgram. (Relationship: VocationalProgram 1:N Application)"
+          "description": "ID of the selected vocational program."
         },
         "applicationDate": {
           "type": "string",
@@ -206,7 +135,6 @@
         }
       },
       "required": [
-        "id",
         "firstName",
         "lastName",
         "email",
@@ -243,8 +171,7 @@
         }
       },
       "required": [
-        "email",
-        "role"
+        "email"
       ]
     },
     "ContactMessage": {
@@ -253,10 +180,6 @@
       "type": "object",
       "description": "Represents a message submitted through the contact form.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the contact message."
-        },
         "name": {
           "type": "string",
           "description": "Name of the person who sent the message."
@@ -281,7 +204,6 @@
         }
       },
       "required": [
-        "id",
         "name",
         "email",
         "subject",
@@ -295,10 +217,6 @@
       "type": "object",
       "description": "Represents a testimonial from a student, parent, or alumnus.",
       "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the testimonial."
-        },
         "name": {
           "type": "string",
           "description": "Name of the person giving the testimonial."
@@ -318,7 +236,6 @@
         }
       },
       "required": [
-        "id",
         "name",
         "title",
         "quote",
@@ -336,9 +253,8 @@
       {
         "path": "/vocationalPrograms/{vocationalProgramId}",
         "definition": {
-          "entityName": "VocationalProgram",
           "schema": {
-            "$ref": "#/backend/entities/VocationalProgram"
+            "$ref": "#/entities/VocationalProgram"
           },
           "description": "Stores information about vocational programs offered by the school."
         }
@@ -346,39 +262,26 @@
       {
         "path": "/newsArticles/{newsArticleId}",
         "definition": {
-          "entityName": "NewsArticle",
           "schema": {
-            "$ref": "#/backend/entities/NewsArticle"
+            "$ref": "#/entities/NewsArticle"
           },
           "description": "Stores news articles and announcements."
         }
       },
       {
-        "path": "/events/{eventId}",
-        "definition": {
-          "entityName": "Event",
-          "schema": {
-            "$ref": "#/backend/entities/Event"
-          },
-          "description": "Stores information about school events."
-        }
-      },
-      {
         "path": "/galleryAlbums/{galleryAlbumId}",
         "definition": {
-          "entityName": "GalleryAlbum",
           "schema": {
-            "$ref": "#/backend/entities/GalleryAlbum"
+            "$ref": "#/entities/GalleryAlbum"
           },
-          "description": "Stores gallery albums containing images and videos."
+          "description": "Stores gallery albums containing images."
         }
       },
       {
         "path": "/users/{userId}",
         "definition": {
-          "entityName": "UserProfile",
           "schema": {
-            "$ref": "#/backend/entities/UserProfile"
+            "$ref": "#/entities/UserProfile"
           },
           "description": "Stores user profile information for all users, including admins. The 'role' field is used for authorization."
         }
@@ -386,9 +289,8 @@
       {
         "path": "/applications/{applicationId}",
         "definition": {
-          "entityName": "Application",
           "schema": {
-            "$ref": "#/backend/entities/Application"
+            "$ref": "#/entities/Application"
           },
           "description": "Stores student applications in a single collection for easier admin querying."
         }
@@ -396,9 +298,8 @@
       {
         "path": "/contactMessages/{contactMessageId}",
         "definition": {
-          "entityName": "ContactMessage",
           "schema": {
-            "$ref": "#/backend/entities/ContactMessage"
+            "$ref": "#/entities/ContactMessage"
           },
           "description": "Stores messages submitted through the website's contact form. This allows admins to view user inquiries."
         }
@@ -406,14 +307,12 @@
       {
         "path": "/testimonials/{testimonialId}",
         "definition": {
-          "entityName": "Testimonial",
           "schema": {
-            "$ref": "#/backend/entities/Testimonial"
+            "$ref": "#/entities/Testimonial"
           },
           "description": "Stores testimonials from students, parents, and alumni for the homepage."
         }
       }
-    ],
-    "reasoning": "The Firestore data structure has been updated to place the 'applications' collection at the root level. This change significantly simplifies querying for administrators, who now need to list all applications regardless of the user who submitted them. The previous nested structure (`/users/{userId}/applications/{applicationId}`) was ideal for user-specific queries but cumbersome for admin-level data aggregation. By moving it to `/applications/{applicationId}`, we enable straightforward `list` operations for the admin panel while still being able to secure it so that only admins can read all applications and users can only read their own (if needed, through rules). All other collections remain as they were, following principles of structural segregation and role-based access control via the 'role' field in the '/users/{userId}' documents. A new root collection 'contactMessages' has been added to store submissions from the contact form for admin review."
+    ]
   }
 }

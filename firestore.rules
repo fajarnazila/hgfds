@@ -7,119 +7,61 @@ service cloud.firestore {
     // Helper Functions
     //----------------------------------------------------------------------
 
-    /**
-     * Checks if a user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Validates if the requesting user's UID matches the provided userId.
-     * This is the foundation of the user-ownership model.
-     * @param userId The user ID to check against the authenticated user.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Checks if the authenticated user has an 'Admin' or 'Super Admin' role.
-     * This function performs a read on the user's own document to fetch their role.
-     */
     function isAdmin() {
-      // Check for existence of the user document before accessing data
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
              (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['Admin', 'Super Admin']);
     }
 
-    /**
-     * Checks if the user is a Super Admin.
-     */
     function isSuperAdmin() {
-        return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'Super Admin';
     }
-
-    /**
-     * Checks if the users collection is empty. Used to assign the first user as Super Admin.
-     * This is intended to be called within a write rule for the users collection.
-     */
+    
     function isFirstUser() {
-        // This is a simplified check. A robust implementation might require a Cloud Function for atomicity.
-        // It checks if the number of users is zero before the current write operation.
-        return list(/databases/$(database)/documents/users).size() == 0;
+        return !exists(/databases/$(database)/documents/users/);
     }
-
+    
     //----------------------------------------------------------------------
     // Public Read-Only Collections (Admin-Managed)
     //----------------------------------------------------------------------
 
-    /**
-     * @description Manages vocational programs. Publicly readable by anyone, but
-     *   only administrators can create, update, or delete entries.
-     * @path /vocationalPrograms/{vocationalProgramId}
-     */
-    match /vocationalPrograms/{vocationalProgramId} {
+    match /vocationalPrograms/{docId} {
       allow get, list: if true;
       allow write: if isAdmin();
     }
 
-    /**
-     * @description Manages news articles. Publicly readable by anyone, but
-     *   only administrators can create, update, or delete articles.
-     * @path /newsArticles/{newsArticleId}
-     */
-    match /newsArticles/{newsArticleId} {
+    match /newsArticles/{docId} {
       allow get, list: if true;
       allow write: if isAdmin();
     }
     
-    /**
-     * @description Manages testimonials. Publicly readable, but only admins can
-     * write.
-     * @path /testimonials/{testimonialId}
-     */
-    match /testimonials/{testimonialId} {
+    match /testimonials/{docId} {
         allow get, list: if true;
         allow write: if isAdmin();
     }
 
-    /**
-     * @description Manages school events. Publicly readable by anyone, but
-     *   only administrators can create, update, or delete events.
-     * @path /events/{eventId}
-     */
-    match /events/{eventId} {
+    match /galleryAlbums/{docId} {
       allow get, list: if true;
       allow write: if isAdmin();
     }
+    
+    //----------------------------------------------------------------------
+    // User-Submitted Data
+    //----------------------------------------------------------------------
 
-    /**
-     * @description Manages gallery albums. Publicly readable by anyone, but
-     *   only administrators can create, update, or delete albums.
-     * @path /galleryAlbums/{galleryAlbumId}
-     */
-    match /galleryAlbums/{galleryAlbumId} {
-      allow get, list: if true;
-      allow write: if isAdmin();
-    }
-
-    /**
-     * @description Manages student applications. Anyone can create (submit) an application.
-     *  Only admins can read, list, update, or delete them. This enables a global admin view.
-     * @path /applications/{applicationId}
-     */
     match /applications/{applicationId} {
       allow create: if true;
-      allow get, list, update, delete: if isAdmin();
+      allow read, list, update, delete: if isAdmin();
     }
 
-    /**
-     * @description Manages contact form submissions. Anyone can submit a message.
-     *  Only admins can read the messages. Deletion is restricted for archival purposes.
-     * @path /contactMessages/{contactMessageId}
-     */
     match /contactMessages/{contactMessageId} {
       allow create: if true;
       allow read, list: if isAdmin();
@@ -130,22 +72,12 @@ service cloud.firestore {
     // User-Specific Collections
     //----------------------------------------------------------------------
 
-    /**
-     * @description Manages user profile data and roles.
-     *  - A user can read their own profile.
-     *  - Any user can create their own user document on signup. The first user is automatically made a Super Admin.
-     *  - Only Admins or Super Admins can list users.
-     *  - Only Super Admins can update or delete other users.
-     * @path /users/{userId}
-     */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isAdmin();
       
       allow create: if isOwner(userId) && (
-          // The first user being created must have the 'Super Admin' role.
           (isFirstUser() && request.resource.data.role == 'Super Admin') ||
-          // Subsequent users must have the 'User' role.
           (!isFirstUser() && request.resource.data.role == 'User')
       );
                       

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, Mail, Phone, MapPin } from "lucide-react"
-import { submitContactForm } from "./actions"
+import { useFirestore, addDocumentNonBlocking } from "@/firebase"
+import { collection, serverTimestamp } from "firebase/firestore"
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nama harus memiliki setidaknya 2 karakter." }),
@@ -23,6 +24,7 @@ const formSchema = z.object({
 export default function ContactPage() {
   const [isPending, startTransition] = useTransition()
   const { toast } = useToast()
+  const firestore = useFirestore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,18 +38,33 @@ export default function ContactPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
-      const result = await submitContactForm(values)
-      if (result.success) {
+      if (!firestore) {
+        toast({
+          variant: "destructive",
+          title: "Gagal Mengirim Pesan",
+          description: "Koneksi ke database gagal.",
+        })
+        return
+      }
+
+      try {
+        const messagesCol = collection(firestore, "contactMessages")
+        await addDocumentNonBlocking(messagesCol, {
+          ...values,
+          submittedAt: serverTimestamp(),
+        })
+
         toast({
           title: "Pesan Terkirim!",
           description: "Terima kasih telah menghubungi kami. Kami akan segera merespons pesan Anda.",
         })
         form.reset()
-      } else {
+      } catch (error) {
+        console.error("Error submitting contact form:", error)
         toast({
           variant: "destructive",
           title: "Gagal Mengirim Pesan",
-          description: result.error || "Terjadi kesalahan. Silakan coba lagi nanti.",
+          description: "Terjadi kesalahan. Silakan coba lagi nanti.",
         })
       }
     })

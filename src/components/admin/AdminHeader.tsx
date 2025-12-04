@@ -1,13 +1,21 @@
+
+"use client"
+
 import Link from "next/link"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Search } from "lucide-react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
+import { useAuth, useUser } from "@/firebase"
+import { useToast } from "@/hooks/use-toast"
+import { useRouter } from "next/navigation"
+import { signOut } from "firebase/auth"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,11 +24,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Search, CircleUser } from "lucide-react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function AdminHeader() {
+  const auth = useAuth()
+  const { user } = useUser()
+  const router = useRouter()
+  const { toast } = useToast()
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    try {
+      await signOut(auth)
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      })
+      router.push('/login')
+    } catch (error) {
+      console.error("Logout failed:", error)
+      toast({
+        variant: "destructive",
+        title: "Logout Failed",
+        description: "An error occurred during logout. Please try again.",
+      })
+    }
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
       <SidebarTrigger className="sm:hidden" />
@@ -48,17 +78,20 @@ export default function AdminHeader() {
             size="icon"
             className="overflow-hidden rounded-full"
           >
-            <CircleUser className="h-5 w-5" />
+             <Avatar className="h-9 w-9">
+                <AvatarImage src={user?.photoURL || "https://picsum.photos/seed/admin/100/100"} alt="Admin" />
+                <AvatarFallback>{user?.email?.charAt(0).toUpperCase() || 'A'}</AvatarFallback>
+              </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => router.push('/admin/settings')}>Settings</DropdownMenuItem>
           <DropdownMenuItem>Support</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-             <Link href="/login">Logout</Link>
+          <DropdownMenuItem onSelect={handleLogout}>
+             Logout
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
