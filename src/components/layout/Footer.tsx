@@ -1,8 +1,18 @@
+
 import Link from 'next/link';
 import { BookHeart, Twitter, Facebook, Instagram, Youtube } from 'lucide-react';
-import { navLinks } from '@/lib/placeholder-data';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'Tentang Kami' },
+  { href: '/programs', label: 'Program' },
+  { href: '/news', label: 'Berita' },
+  { href: '/gallery', label: 'Galeri' },
+  { href: '/admissions', label: 'Penerimaan' },
+  { href: '/contact', label: 'Kontak' },
+];
 
 export default function Footer() {
   return (

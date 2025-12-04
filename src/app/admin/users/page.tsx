@@ -86,7 +86,7 @@ export default function AdminUsersPage() {
                     </div>
                 </TableCell>
                 <TableCell>
-                    <Badge variant={user.role === 'Admin' || user.role === 'Super Admin' ? 'default' : 'secondary'}>{user.role}</Badge>
+                    <Badge variant={user.role === 'Admin' || user.role === 'Super Admin' ? 'default' : 'secondary'}>{user.role || 'User'}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
                     {/* Future actions like edit/delete can be added here */}

@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import {
   Card,
   CardContent,
@@ -16,9 +17,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { format } from "date-fns"
+import { Button } from "@/components/ui/button"
 
 type ContactMessage = {
   id: string;
@@ -31,6 +40,8 @@ type ContactMessage = {
 
 export default function AdminMessagesPage() {
   const firestore = useFirestore()
+  const [selectedMessage, setSelectedMessage] = React.useState<ContactMessage | null>(null)
+
   const messagesQuery = useMemoFirebase(() => {
     if (!firestore) return null
     return query(
@@ -42,6 +53,7 @@ export default function AdminMessagesPage() {
   const { data: messages, isLoading } = useCollection<ContactMessage>(messagesQuery)
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Pesan Masuk</CardTitle>
@@ -66,7 +78,7 @@ export default function AdminMessagesPage() {
               </TableRow>
             )}
             {messages && messages.length > 0 ? messages.map((msg) => (
-              <TableRow key={msg.id}>
+              <TableRow key={msg.id} className="cursor-pointer" onClick={() => setSelectedMessage(msg)}>
                 <TableCell>
                     <div className="font-medium">{msg.name}</div>
                     <div className="text-sm text-muted-foreground">{msg.email}</div>
@@ -74,7 +86,9 @@ export default function AdminMessagesPage() {
                 <TableCell>{msg.subject}</TableCell>
                 <TableCell>{msg.submittedAt ? format(new Date(msg.submittedAt.seconds * 1000), "yyyy-MM-dd HH:mm") : 'N/A'}</TableCell>
                 <TableCell className="text-right">
-                    {/* Future actions like view details can be added here */}
+                    <Button variant="outline" size="sm" onClick={() => setSelectedMessage(msg)}>
+                        Lihat
+                    </Button>
                 </TableCell>
               </TableRow>
             )) : !isLoading && (
@@ -86,5 +100,20 @@ export default function AdminMessagesPage() {
         </Table>
       </CardContent>
     </Card>
+
+    <Dialog open={!!selectedMessage} onOpenChange={(isOpen) => !isOpen && setSelectedMessage(null)}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{selectedMessage?.subject}</DialogTitle>
+            <DialogDescription>
+              Dari: {selectedMessage?.name} ({selectedMessage?.email})
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 whitespace-pre-wrap text-sm text-muted-foreground">
+            {selectedMessage?.message}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

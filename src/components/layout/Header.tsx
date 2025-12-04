@@ -1,16 +1,26 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, BookHeart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { navLinks } from '@/lib/placeholder-data';
 import { cn } from '@/lib/utils';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet"
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'Tentang Kami' },
+  { href: '/programs', label: 'Program' },
+  { href: '/news', label: 'Berita' },
+  { href: '/gallery', label: 'Galeri' },
+  { href: '/admissions', label: 'Penerimaan' },
+  { href: '/contact', label: 'Kontak' },
+];
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
