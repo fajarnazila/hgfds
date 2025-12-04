@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import {
   Breadcrumb,
@@ -25,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import AdminSearch from "./AdminSearch"
 
 export default function AdminHeader() {
   const auth = useAuth()
@@ -64,12 +66,7 @@ export default function AdminHeader() {
         </BreadcrumbList>
       </Breadcrumb>
       <div className="relative ml-auto flex-1 md:grow-0">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Cari..."
-          className="w-full rounded-lg bg-secondary pl-8 md:w-[200px] lg:w-[336px]"
-        />
+        <AdminSearch />
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

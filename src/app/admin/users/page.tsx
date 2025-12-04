@@ -37,7 +37,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
@@ -46,7 +45,7 @@ import { useUser as useAuthUser } from "@/firebase"
 
 type UserRole = 'Admin' | 'User' | 'Super Admin';
 
-type User = {
+export type User = {
   id: string;
   displayName: string;
   email: string;
@@ -66,7 +65,7 @@ export default function AdminUsersPage() {
     return query(
       collection(firestore, "users")
     )
-  }, [firestore])
+  }, [firestore, currentUser?.uid])
 
   const { data: users, isLoading } = useCollection<User>(usersQuery)
 
