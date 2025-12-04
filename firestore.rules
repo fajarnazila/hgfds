@@ -55,6 +55,16 @@ service cloud.firestore {
       allow get, list: if true;
       allow write: if isAdmin();
     }
+    
+    /**
+     * @description Manages testimonials. Publicly readable, but only admins can
+     * write.
+     * @path /testimonials/{testimonialId}
+     */
+    match /testimonials/{testimonialId} {
+        allow get, list: if true;
+        allow write: if isAdmin();
+    }
 
     /**
      * @description Manages school events. Publicly readable by anyone, but
@@ -113,5 +123,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

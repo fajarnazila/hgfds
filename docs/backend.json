@@ -222,11 +222,26 @@
       "type": "object",
       "description": "Represents a user's profile information.",
       "properties": {
-          "email": { "type": "string", "format": "email" },
-          "displayName": { "type": "string" },
-          "role": { "type": "string", "enum": ["Super Admin", "Admin", "User"] }
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "Super Admin",
+            "Admin",
+            "User"
+          ]
+        }
       },
-      "required": ["email", "role"]
+      "required": [
+        "email",
+        "role"
+      ]
     },
     "ContactMessage": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -268,6 +283,42 @@
         "subject",
         "message",
         "submittedAt"
+      ]
+    },
+    "Testimonial": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Testimonial",
+      "type": "object",
+      "description": "Represents a testimonial from a student, parent, or alumnus.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the testimonial."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person giving the testimonial."
+        },
+        "title": {
+          "type": "string",
+          "description": "Title or role of the person (e.g., 'Alumnus', 'Parent')."
+        },
+        "quote": {
+          "type": "string",
+          "description": "The testimonial quote."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the person's portrait image.",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "title",
+        "quote",
+        "imageUrl"
       ]
     }
   },
@@ -347,10 +398,18 @@
           },
           "description": "Stores messages submitted through the website's contact form. This allows admins to view user inquiries."
         }
+      },
+      {
+        "path": "/testimonials/{testimonialId}",
+        "definition": {
+          "entityName": "Testimonial",
+          "schema": {
+            "$ref": "#/backend/entities/Testimonial"
+          },
+          "description": "Stores testimonials from students, parents, and alumni for the homepage."
+        }
       }
     ],
     "reasoning": "The Firestore data structure has been updated to place the 'applications' collection at the root level. This change significantly simplifies querying for administrators, who now need to list all applications regardless of the user who submitted them. The previous nested structure (`/users/{userId}/applications/{applicationId}`) was ideal for user-specific queries but cumbersome for admin-level data aggregation. By moving it to `/applications/{applicationId}`, we enable straightforward `list` operations for the admin panel while still being able to secure it so that only admins can read all applications and users can only read their own (if needed, through rules). All other collections remain as they were, following principles of structural segregation and role-based access control via the 'role' field in the '/users/{userId}' documents. A new root collection 'contactMessages' has been added to store submissions from the contact form for admin review."
   }
 }
-
-    
