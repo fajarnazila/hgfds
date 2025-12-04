@@ -55,10 +55,10 @@ service cloud.firestore {
 
     match /contactMessages/{contactMessageId} {
       allow create: if true;
-      // Admins can read submitted messages
-      allow get, list: if isAdmin();
+      // Admins can read and delete submitted messages
+      allow get, list, delete: if isAdmin();
       // Messages are immutable by clients
-      allow update, delete: if false; 
+      allow update: if false; 
     }
 
     //----------------------------------------------------------------------
