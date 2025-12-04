@@ -1,6 +1,7 @@
 
 "use client"
 
+import * as React from "react"
 import {
   Card,
   CardContent,
@@ -16,21 +17,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase"
-import { collection, query } from "firebase/firestore"
+import { useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from "@/firebase"
+import { collection, query, doc } from "firebase/firestore"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { MoreHorizontal } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+
+type UserRole = 'Admin' | 'User' | 'Super Admin';
 
 type User = {
   id: string;
   displayName: string;
   email: string;
   photoURL?: string | null;
-  role: 'Admin' | 'User' | 'Super Admin';
+  role: UserRole;
 }
+
+const roles: UserRole[] = ['Admin', 'User'];
 
 export default function AdminUsersPage() {
   const firestore = useFirestore()
+  const { toast } = useToast()
+  
   const usersQuery = useMemoFirebase(() => {
     if (!firestore) return null
     return query(
@@ -49,6 +65,26 @@ export default function AdminUsersPage() {
     }
     return 'U';
   }
+
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
+    if (!firestore) return;
+    const userDocRef = doc(firestore, "users", userId);
+    try {
+      await updateDocumentNonBlocking(userDocRef, { role: newRole });
+      toast({
+        title: "Peran Diperbarui",
+        description: `Peran pengguna telah berhasil diubah menjadi ${newRole}.`,
+      });
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast({
+        variant: "destructive",
+        title: "Gagal Memperbarui Peran",
+        description: "Terjadi kesalahan. Silakan coba lagi.",
+      });
+    }
+  };
+
 
   return (
     <Card>
@@ -89,7 +125,24 @@ export default function AdminUsersPage() {
                     <Badge variant={user.role === 'Admin' || user.role === 'Super Admin' ? 'default' : 'secondary'}>{user.role || 'User'}</Badge>
                 </TableCell>
                 <TableCell className="text-right">
-                    {/* Future actions like edit/delete can be added here */}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        {roles.map((role) => (
+                          <DropdownMenuItem 
+                            key={role}
+                            disabled={user.role === role}
+                            onSelect={() => handleRoleChange(user.id, role)}
+                          >
+                            Jadikan {role}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                 </TableCell>
               </TableRow>
             )) : !isLoading && (
