@@ -55,7 +55,7 @@ service cloud.firestore {
 
     match /contactMessages/{contactMessageId} {
       allow create: if true;
-      // Only admins can read submitted messages
+      // Admins can read submitted messages
       allow get, list: if isAdmin();
       // Messages are immutable by clients
       allow update, delete: if false; 
@@ -77,6 +77,14 @@ service cloud.firestore {
       
       // Only admins can delete users.
       allow delete: if isAdmin(); 
+    }
+
+    //----------------------------------------------------------------------
+    // Site-Wide Settings (Admin only)
+    //----------------------------------------------------------------------
+    match /siteSettings/main {
+      allow get, list: if true;
+      allow write: if isAdmin();
     }
   }
 }
